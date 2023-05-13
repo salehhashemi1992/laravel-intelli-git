@@ -1,0 +1,1 @@
+# laravel-intelli-git
