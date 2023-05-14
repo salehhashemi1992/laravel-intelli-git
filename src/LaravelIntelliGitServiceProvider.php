@@ -3,6 +3,7 @@
 namespace Salehhashemi\LaravelIntelliGit;
 
 use Illuminate\Support\ServiceProvider;
+use Salehhashemi\LaravelIntelliGit\Console\AiCommitCommand;
 
 class LaravelIntelliGitServiceProvider extends ServiceProvider
 {
@@ -17,7 +18,7 @@ class LaravelIntelliGitServiceProvider extends ServiceProvider
             ], 'config');
 
             $this->commands([
-
+                AiCommitCommand::class,
             ]);
         }
     }
