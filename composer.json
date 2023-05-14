@@ -59,7 +59,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Salehhashemi\\LaravelIntelliGit\\LaravelIntelliGit"
+                "Salehhashemi\\LaravelIntelliGit\\LaravelIntelliGitServiceProvider"
             ],
             "aliases": {
                 "LaravelIntelliGit": "Salehhashemi\\LaravelIntelliGit\\LaravelIntelliGitFacade"
