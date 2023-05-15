@@ -87,13 +87,15 @@ class AiCommitCommand extends Command
      */
     private function createAiPrompt(string $commitChanges): string
     {
-        return "Based on the following line-by-line changes in a commit, please generate an informative commit title and description
-        \n(max two or three lines of description to not exceed the model max token limitation):
-        \nCommit changes:
-        \n{$commitChanges}
-        \nFormat your response as follows:
-        \nCommit title: [Generated commit title]
-        \nCommit description: [Generated commit description]";
+        $prompt = 'Based on the following line-by-line changes in a commit, please generate an informative commit title and description';
+        $prompt .= "\n(max two or three lines of description to not exceed the model max token limitation):";
+        $prompt .= "\nCommit changes:";
+        $prompt .= "\n{$commitChanges}";
+        $prompt .= "\nFormat your response as follows:";
+        $prompt .= "\nCommit title: [Generated commit title]";
+        $prompt .= "\nCommit description: [Generated commit description]";
+
+        return $prompt;
     }
 
     /**
