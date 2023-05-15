@@ -122,7 +122,8 @@ class AiCommitCommand extends Command
      */
     private function commit(array $commitDetails): void
     {
-        $this->info("Title: {$commitDetails['title']}\nDescription:\n{$commitDetails['description']}");
+        $this->line("<bg=blue;options=bold>Title</>\n<fg=Cyan>{$commitDetails['title']}</>");
+        $this->line("<bg=blue;options=bold>Description</>\n<fg=Cyan>{$commitDetails['description']}</>");
 
         if ($this->confirm('Do you wish to commit these changes?')) {
             $process = Process::fromShellCommandline('git commit -m "'.$commitDetails['title'].'" -m "'.$commitDetails['description'].'"');
