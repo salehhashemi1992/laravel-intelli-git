@@ -4,6 +4,7 @@ namespace Salehhashemi\LaravelIntelliGit\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\RequestException;
+use InvalidArgumentException;
 use Salehhashemi\LaravelIntelliGit\OpenAi;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -30,6 +31,30 @@ class AiCommitCommand extends Command
      */
     public function handle(): int
     {
+        $diff = $this->getLimitedDiff();
+        $prompt = $this->createAiPrompt($diff);
+
+        try {
+            $commitDetails = $this->fetchAiGeneratedContent($prompt);
+            $this->commit($commitDetails);
+        } catch (InvalidArgumentException $e) {
+            $this->error('An error occurred when generating the commit message: '.$e->getMessage());
+
+            return 1;
+        } catch (RequestException $e) {
+            $this->error('An error occurred when communicating with the OpenAI service: '.$e->getMessage());
+
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Get the diff of staged changes limited by the maxDiffLines.
+     */
+    private function getLimitedDiff(): string
+    {
         $process = Process::fromShellCommandline('git diff --cached');
         $process->run();
 
@@ -38,16 +63,23 @@ class AiCommitCommand extends Command
         }
 
         $diff = $process->getOutput();
-        $prompt = $this->createAiPrompt($diff);
+        $diffLines = explode("\n", $diff);
 
-        try {
-            $commitDetails = $this->fetchAiGeneratedContent($prompt);
-            $this->commit($commitDetails);
-        } catch (RequestException $e) {
-            $this->error('Error fetching AI-generated content: '.$e->getMessage());
+        $maxDiffLines = getenv('OPENAI_MODEL') ? match (getenv('OPENAI_MODEL')) {
+            'gpt-3.5-turbo' => 400,
+            'gpt-4' => 800,
+            'gpt-4-32k' => 3200,
+        } : 400;
+
+        $limitedDiffLines = array_slice($diffLines, 0, $maxDiffLines);
+        $limitedDiff = implode("\n", $limitedDiffLines);
+
+        // Add a note if the diff was truncated
+        if (count($diffLines) > $maxDiffLines) {
+            $limitedDiff .= "\n\n... Diff truncated due to length";
         }
 
-        return 0;
+        return $limitedDiff;
     }
 
     /**
