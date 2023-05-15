@@ -103,6 +103,8 @@ class AiCommitCommand extends Command
      */
     private function fetchAiGeneratedContent(string $prompt): array
     {
+        $this->info('Generating commit message with AI, please wait...');
+
         $generatedText = $this->openAi->execute($prompt, 100);
 
         preg_match("/Commit title: (.+)\nCommit description: (.+)/s", $generatedText, $matches);
