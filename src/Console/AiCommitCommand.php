@@ -54,7 +54,7 @@ class AiCommitCommand extends Command
 
         try {
             $commitDetails = $this->fetchAiGeneratedContent($prompt);
-            $this->commit($commitDetails);
+            $this->result($commitDetails);
         } catch (InvalidArgumentException $e) {
             $this->error('An error occurred when generating the commit message: '.$e->getMessage());
 
@@ -193,20 +193,9 @@ class AiCommitCommand extends Command
     /**
      * Commit the changes.
      */
-    private function commit(array $commitDetails): void
+    private function result(array $commitDetails): void
     {
         $this->line("<bg=blue;options=bold>Title</>\n<fg=Cyan>{$commitDetails['title']}</>");
         $this->line("<bg=blue;options=bold>Description</>\n<fg=Cyan>{$commitDetails['description']}</>");
-
-        if ($this->confirm('Do you wish to commit these changes?')) {
-            $process = Process::fromShellCommandline('git commit -m "'.$commitDetails['title'].'" -m "'.$commitDetails['description'].'"');
-            $process->run();
-
-            if (! $process->isSuccessful()) {
-                throw new ProcessFailedException($process);
-            }
-
-            $this->info('Changes committed successfully.');
-        }
     }
 }
