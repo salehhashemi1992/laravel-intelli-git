@@ -195,6 +195,8 @@ class AiCommitCommand extends Command
      */
     private function result(array $commitDetails): void
     {
+        $this->info("\nHere are the AI-generated commit title and description:");
+
         $this->line("<bg=blue;options=bold>Title</>\n<fg=Cyan>{$commitDetails['title']}</>");
         $this->line("<bg=blue;options=bold>Description</>\n<fg=Cyan>{$commitDetails['description']}</>");
     }
