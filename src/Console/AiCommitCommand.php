@@ -31,6 +31,22 @@ class AiCommitCommand extends Command
      */
     public function handle(): int
     {
+        // Check for staged changes
+        $stagedChanges = $this->hasStagedChanges();
+
+        if (! $stagedChanges) {
+            $this->info('No staged changes found.');
+            $unstagedChanges = $this->hasUnstagedChanges();
+
+            if ($unstagedChanges && $this->confirm('There are unstaged changes. Would you like to stage all changes?')) {
+                $this->stageAllChanges();
+            } else {
+                $this->info('No unstaged changes found or staging cancelled.');
+
+                return 0;
+            }
+        }
+
         $diff = $this->getLimitedDiff();
         $prompt = $this->createAiPrompt($diff);
 
@@ -51,11 +67,52 @@ class AiCommitCommand extends Command
     }
 
     /**
+     * Check for staged changes.
+     */
+    private function hasStagedChanges(): bool
+    {
+        $process = Process::fromShellCommandline('git diff --staged --quiet');
+        $process->run();
+
+        // Process will be successful when there's no changes
+        return $process->getExitCode() !== 0;
+    }
+
+    /**
+     * Check for unstaged changes.
+     */
+    private function hasUnstagedChanges(): bool
+    {
+        $process = Process::fromShellCommandline('git diff --quiet');
+        $process->run();
+
+        // Process will be successful when there's no changes
+        return $process->getExitCode() !== 0;
+    }
+
+    /**
+     * Stage all changes.
+     */
+    private function stageAllChanges(): void
+    {
+        $process = Process::fromShellCommandline('git add .');
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        $this->info('All changes have been staged.');
+    }
+
+    /**
      * Get the diff of staged changes limited by the maxDiffLines.
      */
     private function getLimitedDiff(): string
     {
-        $process = Process::fromShellCommandline('git diff --cached');
+        $command = "git diff --staged | grep -v 'warning' | grep -Ev 'composer\.lock|\.env'";
+
+        $process = Process::fromShellCommandline($command);
         $process->run();
 
         if (! $process->isSuccessful()) {
