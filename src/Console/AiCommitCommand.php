@@ -31,6 +31,8 @@ class AiCommitCommand extends Command
      */
     public function handle(): int
     {
+        $this->setGitAutoCrlf();
+
         // Check for staged changes
         $stagedChanges = $this->hasStagedChanges();
 
@@ -64,6 +66,21 @@ class AiCommitCommand extends Command
         }
 
         return 0;
+    }
+
+    /**
+     * Sets git autocrlf to true
+     */
+    private function setGitAutoCrlf(): void
+    {
+        $command = 'git config core.autocrlf true';
+
+        $process = Process::fromShellCommandline($command);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
     }
 
     /**
