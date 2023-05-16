@@ -69,7 +69,7 @@ class AiCommitCommand extends Command
     }
 
     /**
-     * Sets git autocrlf to true
+     * Sets git autocrlf to true.
      */
     private function setGitAutoCrlf(): void
     {
