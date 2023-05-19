@@ -127,12 +127,18 @@ class AiCommitCommand extends Command
      */
     private function getLimitedDiff(): string
     {
-        $command = "git diff --staged | grep -v 'warning' | grep -Ev 'composer\.lock|\.env'";
+        $diffCommand = 'git diff --staged';
 
-        $process = Process::fromShellCommandline($command);
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $diffCommand .= ' | findstr /v "warning" | findstr /v /c:"composer.lock" /c:".env"';
+        } else {
+            $diffCommand .= " | grep -v 'warning' | grep -Ev 'composer\.lock|\.env'";
+        }
+
+        $process = Process::fromShellCommandline($diffCommand);
         $process->run();
 
-        if (! $process->isSuccessful()) {
+        if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
 
@@ -143,7 +149,8 @@ class AiCommitCommand extends Command
             'gpt-3.5-turbo' => 400,
             'gpt-4' => 800,
             'gpt-4-32k' => 3200,
-        } : 400;
+        }
+        : 400;
 
         $limitedDiffLines = array_slice($diffLines, 0, $maxDiffLines);
         $limitedDiff = implode("\n", $limitedDiffLines);
