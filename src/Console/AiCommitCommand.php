@@ -138,7 +138,7 @@ class AiCommitCommand extends Command
         $process = Process::fromShellCommandline($diffCommand);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
 
